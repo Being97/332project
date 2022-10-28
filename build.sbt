@@ -7,4 +7,13 @@ lazy val root = (project in file(".")).
     name := "scalatest-example"
   )
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % Test
+Compile / PB.targets := Seq(
+  scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"
+)
+
+// (optional) If you need scalapb/scalapb.proto or anything from
+// google/protobuf/*.proto
+libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.2.9" % Test,
+    "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+)
