@@ -31,3 +31,37 @@
 
 - setup scala environment
 - sorting 알고리즘 이해, 대략적 구조 설계
+
+## Week2 Progress
+
+- 개발 환경 통일
+- gRPC 공부, 알고리즘 대략적 이해
+
+## Week3
+
+### general goals
+
+- 커밋 메시지 형식 통일, coding style guide
+- disk-based merge sort library 찾기
+
+- master, slave 각각 할 일 전체적인 draft → milestone 짜기
+- message 형식, 언제, 어떻게 보낼건지
+- master slave network connection 메시지 띄우기 (gRPC)
+
+### individual goals
+
+빙준호
+
+- gRPC 공부
+- master, slave 각각 할 일 전체적인 draft → milestone 짜기
+- message 형식, 언제, 어떻게 보낼건지
+
+최규민
+
+- master slave network connection 메시지 띄우기 (gRPC)
+
+김지훈
+
+- gRPC 공부
+- disk-based merge sort library 찾기
+- 데이터 교환 방식 정하기
