@@ -65,3 +65,34 @@
 - gRPC 공부
 - disk-based merge sort library 찾기
 - 데이터 교환 방식 정하기
+
+## Week 4
+
+### Progress
+
+- 전체 flow, 메시지 디자인
+- master-slave connection
+- disk based merge sort library 확인
+
+### General Goals
+
+- sampling 방법 - disk에서 읽는 방법
+- 데이터 전송 방법
+- Milestone3- Sort : sorting high order function 작성
+
+### Individual Goals
+
+빙준호
+
+- Milestone 2 : Sampling
+- sampling 방법 - disk에서 읽는 방법
+
+최규민
+
+- Milestone 1 : Init
+- file transfer 방법
+
+김지훈
+
+- Milestone3 : Sort
+- sorting high order function 작성
