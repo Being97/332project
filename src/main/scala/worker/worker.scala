@@ -1,4 +1,4 @@
-package client
+package worker
 
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
@@ -41,7 +41,7 @@ class HelloWorldClient private(
   /** Say hello to server. */
   def greet(name: String): Unit = {
     logger.info("Will try to greet " + name + " ...")
-    val request = HelloRequest(name = name)
+    val request = HelloRequest(name = "client IP")
     try {
       val response = blockingStub.sayHello(request)
       logger.info("Greeting: " + response.message)

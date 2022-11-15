@@ -1,4 +1,4 @@
-package server
+package master
 
 import java.util.logging.Logger
 
@@ -49,7 +49,8 @@ class HelloWorldServer(executionContext: ExecutionContext) { self =>
 
   private class GreeterImpl extends GreeterGrpc.Greeter {
     override def sayHello(req: HelloRequest) = {
-      val reply = HelloReply(message = "Hello " + req.name)
+      val reply = HelloReply(message = "Hello " + "server IP")
+      System.out.println(req.name)
       Future.successful(reply)
     }
   }
