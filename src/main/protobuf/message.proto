@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package connection;
+
+// The greeting service definition.
+service Connection {
+  // Request and Response Connection between master and worker
+  rpc SayHello (ConnectionRequestMsg) returns (ConnectionDoneMsg) {}
+}
+
+// The request message containing the worker's IP Address.
+// Worker -> Master
+message ConnectionRequestMsg {
+  string workerIP = 1;
+}
+
+// The response message indicating connection is made
+// Master -> Worker
+message ConnectionDoneMsg {
+  bool isConnected = 1;
+}

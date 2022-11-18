@@ -2,18 +2,16 @@ package worker
 
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
+import java.net.InetAddress
 
-import com.example.protos.hello.{HelloRequest, GreeterGrpc}
-import com.example.protos.hello.GreeterGrpc.GreeterBlockingStub
+import connection.message.{ConnectionRequestMsg, ConnectionGrpc}
+import connection.message.ConnectionGrpc.ConnectionBlockingStub
 import io.grpc.{StatusRuntimeException, ManagedChannelBuilder, ManagedChannel}
 
-/**
- * [[https://github.com/grpc/grpc-java/blob/v0.15.0/examples/src/main/java/io/grpc/examples/helloworld/HelloWorldClient.java]]
- */
 object HelloWorldClient {
   def apply(host: String, port: Int): HelloWorldClient = {
     val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
-    val blockingStub = GreeterGrpc.blockingStub(channel)
+    val blockingStub = ConnectionGrpc.blockingStub(channel)
     new HelloWorldClient(channel, blockingStub)
   }
 
@@ -21,6 +19,7 @@ object HelloWorldClient {
     val client = HelloWorldClient("localhost", 50051)
     try {
       val user = args.headOption.getOrElse("world")
+      System.out.println("My IP: " + InetAddress.getLocalHost.getHostAddress)
       client.greet(user)
     } finally {
       client.shutdown()
@@ -30,7 +29,7 @@ object HelloWorldClient {
 
 class HelloWorldClient private(
   private val channel: ManagedChannel,
-  private val blockingStub: GreeterBlockingStub
+  private val blockingStub: ConnectionBlockingStub
 ) {
   private[this] val logger = Logger.getLogger(classOf[HelloWorldClient].getName)
 
@@ -40,11 +39,12 @@ class HelloWorldClient private(
 
   /** Say hello to server. */
   def greet(name: String): Unit = {
-    logger.info("Will try to greet " + name + " ...")
-    val request = HelloRequest(name = "client IP")
+    logger.info("Will try to connect to master")
+    val request = ConnectionRequestMsg(workerIP = InetAddress.getLocalHost.getHostAddress)
     try {
       val response = blockingStub.sayHello(request)
-      logger.info("Greeting: " + response.message)
+      if (response.isConnected)
+        logger.info("Connection Successed")
     }
     catch {
       case e: StatusRuntimeException =>
