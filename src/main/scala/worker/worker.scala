@@ -9,6 +9,8 @@ import connection.message.ConnectionGrpc.ConnectionBlockingStub
 import io.grpc.{StatusRuntimeException, ManagedChannelBuilder, ManagedChannel}
 
 object HelloWorldClient {
+  private val logger = Logger.getLogger(classOf[HelloWorldClient].getName)
+
   def apply(host: String, port: Int): HelloWorldClient = {
     val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
     val blockingStub = ConnectionGrpc.blockingStub(channel)
@@ -19,11 +21,11 @@ object HelloWorldClient {
 
   def main(args: Array[String]): Unit = {
     val masterIP = args.headOption.getOrElse("localhost")
-    System.out.println("masterIP : " + masterIP)
+    logger.info("masterIP : " + masterIP)
     val client = HelloWorldClient(masterIP, 50051)
     try {
-      System.out.println("My IP: " + InetAddress.getLocalHost.getHostAddress)
-      client.greet("My IP")
+      logger.info("My IP: " + InetAddress.getLocalHost.getHostAddress)
+      client.connectionRequest(workerIP = InetAddress.getLocalHost.getHostAddress)
     } finally {
       client.awaitTermination()
       // client.shutdown()
@@ -35,7 +37,6 @@ class HelloWorldClient private(
   private val channel: ManagedChannel,
   private val blockingStub: ConnectionBlockingStub
 ) {
-  private[this] val logger = Logger.getLogger(classOf[HelloWorldClient].getName)
 
   def shutdown(): Unit = {
     channel.shutdown.awaitTermination(100, TimeUnit.SECONDS)
@@ -45,18 +46,18 @@ class HelloWorldClient private(
     channel.awaitTermination(100, TimeUnit.SECONDS)
   }
 
-  /** Say hello to server. */
-  def greet(ip: String): Unit = {
-    logger.info("Will try to connect to master")
-    val request = ConnectionRequestMsg(workerIP = ip)
+  /** request connection to master. */
+  def connectionRequest(workerIP: String): Unit = {
+    HelloWorldClient.logger.info("Will try to connect to master")
+    val request = ConnectionRequestMsg(workerIP = workerIP)
     try {
       val response = blockingStub.sayHello(request)
       if (response.isConnected)
-        logger.info("Connection Successed")
+        HelloWorldClient.logger.info("Connection Successed")
     }
     catch {
       case e: StatusRuntimeException =>
-        logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus)
+        HelloWorldClient.logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus)
     }
   }
 }
