@@ -15,14 +15,18 @@ object HelloWorldClient {
     new HelloWorldClient(channel, blockingStub)
   }
 
+  val usage = "Usage: worker [masterIP]"
+
   def main(args: Array[String]): Unit = {
-    val client = HelloWorldClient("localhost", 50051)
+    val masterIP = args.headOption.getOrElse("localhost")
+    System.out.println("masterIP : " + masterIP)
+    val client = HelloWorldClient(masterIP, 50051)
     try {
-      val user = args.headOption.getOrElse("world")
       System.out.println("My IP: " + InetAddress.getLocalHost.getHostAddress)
-      client.greet(user)
+      client.greet("My IP")
     } finally {
-      client.shutdown()
+      client.awaitTermination()
+      // client.shutdown()
     }
   }
 }
@@ -34,13 +38,17 @@ class HelloWorldClient private(
   private[this] val logger = Logger.getLogger(classOf[HelloWorldClient].getName)
 
   def shutdown(): Unit = {
-    channel.shutdown.awaitTermination(5, TimeUnit.SECONDS)
+    channel.shutdown.awaitTermination(100, TimeUnit.SECONDS)
+  }
+
+  def awaitTermination(): Unit = {
+    channel.awaitTermination(100, TimeUnit.SECONDS)
   }
 
   /** Say hello to server. */
-  def greet(name: String): Unit = {
+  def greet(ip: String): Unit = {
     logger.info("Will try to connect to master")
-    val request = ConnectionRequestMsg(workerIP = InetAddress.getLocalHost.getHostAddress)
+    val request = ConnectionRequestMsg(workerIP = ip)
     try {
       val response = blockingStub.sayHello(request)
       if (response.isConnected)

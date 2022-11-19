@@ -12,8 +12,9 @@ object HelloWorldServer {
   private val logger = Logger.getLogger(classOf[HelloWorldServer].getName)
 
   def main(args: Array[String]): Unit = {
+    val numWorkers = args.headOption.getOrElse(2)
     val server = new HelloWorldServer(ExecutionContext.global)
-    System.out.println(InetAddress.getLocalHost.getHostAddress)
+    HelloWorldServer.logger.info("master IP : " + InetAddress.getLocalHost.getHostAddress + ", num of workers : " + numWorkers)
     server.start()
     server.blockUntilShutdown()
   }
