@@ -32,12 +32,12 @@
 - setup scala environment
 - sorting 알고리즘 이해, 대략적 구조 설계
 
-## Week2 Progress
+## Week 3
+
+### Progress of Week 2
 
 - 개발 환경 통일
 - gRPC 공부, 알고리즘 대략적 이해
-
-## Week3
 
 ### general goals
 
@@ -68,7 +68,7 @@
 
 ## Week 4
 
-### Progress
+### Progress of Week 3
 
 - 전체 flow, 메시지 디자인
 - master-slave connection
@@ -96,3 +96,30 @@
 
 - Milestone3 : Sort
 - sorting high order function 작성
+
+## Week 5
+
+### Progress of Week 4
+
+- Milestone 1: Init 완료
+- Sorting function 구현
+- Progress Presentation
+
+### General Goals
+
+### Individual Goals
+
+빙준호
+
+- Milestone 2: Sampling
+- Sampling 방법 - disk에서 읽는 방법
+
+최규민
+
+- 서버에서 master/worker 통신
+- file transfer
+
+김지훈
+
+- Milestone 3: Sort
+- Milestone 4: Merge
