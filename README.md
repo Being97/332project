@@ -106,6 +106,7 @@
 - Progress Presentation
 
 ### General Goals
+Milestone 2, 3, 4
 
 ### Individual Goals
 
@@ -118,6 +119,7 @@
 
 - 서버에서 master/worker 통신
 - file transfer
+- Milestone 4: Merge
 
 김지훈
 
