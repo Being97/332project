@@ -119,12 +119,32 @@ Milestone 2, 3, 4
 
 - 서버에서 master/worker 통신
 - file transfer
-- Milestone 4: Merge
+- Milestone 6: Merge
 
 김지훈
- external mergesort 외부소스코드를 현재 프로젝트에 사용 가능하도록 기능 분할 및 수정.
+- Milestone 3: Sort
+- Milestone 4: Merge
 
- 각 모듈 input, output 명세 및 사용방식 작성
+## Week 6
+
+### Progress of Week 5
+
+- 각 모듈 input, output 명세 및 사용방식 작성
+- external mergesort 외부소스코드를 현재 프로젝트에 사용 가능하도록 기능 분할 및 수정
 - Milestone 3 Sort : version error 수정 및 완성, edge case test
 - Milestone 4 Partition : sampling 및 shuffling 과의 연계 방식 지정 및 구현
 - Milestone 6 Merge : 소스코드 분석 및 편집 계획 수립.
+
+### Individual Goals
+
+빙준호
+- Milestone 2: Sampling
+
+최규민
+- file transfer
+- Milestone 6: Merge
+
+김지훈
+- Milestone 3: Sort
+- Milestone 4: Partition
+- Milestone 6: Merge
