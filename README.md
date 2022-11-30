@@ -123,7 +123,8 @@ Milestone 2, 3, 4
 
 김지훈
 - Milestone 3: Sort
-- Milestone 4: Merge
+- Milestone 4: Partition
+- Milestone 6: Merge
 
 ## Week 6
 
@@ -148,3 +149,21 @@ Milestone 2, 3, 4
 - Milestone 3: Sort
 - Milestone 4: Partition
 - Milestone 6: Merge
+
+## Week 7
+
+### Progress of Week 6
+- Milestone 3 Sort
+- Milestone 6 Merge
+
+### Individual Goals
+
+빙준호
+- Milestone 2: Sampling
+- data transfer
+
+최규민
+- data transfer
+
+김지훈
+- Milestone 4: Partition
