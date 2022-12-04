@@ -167,3 +167,24 @@ Milestone 2, 3, 4
 
 김지훈
 - Milestone 4: Partition
+
+## Week 8
+
+### Progress of Week 7
+- Data transfer
+- Sampling 방법 재논의, 각 worker가 sample data와 'data 개수 / chunck size'도 master에게 전달하고, 이를 리스트로 만들어 각 worker에게 전달하기로 함.
+- milestone 5: shuffle에서 필요한 data 논의
+
+###Individual Goals
+
+빙준호
+- Milestone 2: Sampling
+- main, 앞뒤 milestone 과의 syncronization
+
+최규민
+- Milestone 5: Shuffle
+- main, 앞뒤 milestone 과의 syncronization
+
+김지훈
+- Mileston 4: Partition
+- main, 앞뒤 milestone 과의 syncronization
