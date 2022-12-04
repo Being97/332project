@@ -17,6 +17,14 @@ object IO {
     def descOrder(start: Int, end: Int): Seq[Int] = end to start by -1
   }
 
+  def ChunkPathGeneratorForMergeWorker(countList: List[Int], tmp: String, myNum : Int): Seq[String] = {
+    val Cpath = countList.zipWithIndex.map { case (n, id) =>
+      assert(n > 0)
+      for (i <- 0 to n - 1 if n > 0) yield s"$tmp/chunk-$id-$i-$myNum"
+    }
+    Cpath.flatten
+  }
+
   def writeShuffled(from: Int, to: Int, path: String): Unit = overwrite(path) { in =>
     val numbers = NumGenerator.shuffledOrder(from, to)
     numbers.foreach { e =>

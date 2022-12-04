@@ -1,0 +1,78 @@
+규칙
+1. Chunk name
+
+Chunk-N-J-K, ex) Chunk-1-2-4 : worker1이 만든 2번째 청크에서 worker4에게 넘겨줄 파일.
+
+worker N이 자신의 데이터를 J개의 청크로 분할, 샘플링 결과에 따라 각 청크를 K part로 partition
+이후 worker K가 셔플링을 통해 데이터를 받아서 merge
+
+N : 최초 데이터를 분할하고 청크를 만든 worker의 번호
+J : 최초 분할될때 j번째 청크를 의미
+K : 셔플링 후 merge 시킬 worker의 번호
+N, J, K 는 모두 0 부터 시작한다.
+
+
+요청사항
+sampling step : sampling 기준이 되는 string이 들어있는 partitionBound : List[string]이 필요함. 
+shuffle step : 파일 뿐만아니라 해당 worker가 넘겨주는 파일의 개수 j도 받아야 함. (어떻게 넘길지 규약 지정 필요)
+
+splitSortPartition step
+
+splitSortPartition(input: String, tmpDir : String, LinesPErChunk : Int, myNum : Int, partitionBound : List[string] ): Future[Int]
+
+기능) 받은 파일을 lineperchunk 단위로 자르고, 각각 정렬한다. 이후 partitonBound의 기준에 맞추어서 lineperchunk 단위로 분할된 파일들을 다시 K등분 한다. 완료되면 생성한 청크의 J 개수를 future로 wrapping하여 리턴한다. 이 future를 통해 해당 step이 완료되었는지 판별한다.
+
+현재 구현상황) Partiton 미구현, split- sorting 구현 및 테스트 완료
+
+특이사항) partition 시 구간에 해당하는 데이터가 없어도 빈 파일이 생성되어야 한다. 따라서 생성하는 파일의 개수는 항상 J * workerNum
+
+테스트케이스)
+파일 분할및 정렬 단계 : 통과
+patitioning : 
+partitionBound edge case : Partition Bound가 극단적이어서 빈 파일을 생성하는 경우를 검사. 
+
+
+
+
+Merge step : j값 받는거 어떻게 처리될지 몰라서 보류중
+
+(필요) 셔플링 과정에서 각 worker가 생성한 청크 개수 J값을 추가로 받아야 한다.
+
+(필요) makeCountList :
+셔플링 과정에서 각 worker가 생성한 청크의 개수 J를 받아 리스트로 정리한다.
+countList = 각 Worker가 분할한 청크의 개수, 즉 j값의 리스트 이다. 예를들어 worker0 이 자신의 초기데이터를 100개의 청크로 나누었다면, countList[0] = 100 이 된다.
+
+ChunkPathGeneratorForMergeWorker(countList: List[Int], tmp: String, myNum : Int): Seq[String]
+기능) 
+해당 함수는 merge step에서 셔플링 된 데이터를 받은 Worker K가 자신이 합쳐야 할 정렬된 파일들의 목록을 생성한다.
+
+변수 설명)
+countList= 각 worker가 생성한 청크의 개수 J의 리스트.
+tmp = 파일을 저장할 절대경로,  s"${IO.getCwd}/files" 로 프로젝트내에 files 폴더를 만들어놓고 작업중.
+myNum = merge를 진행할 Worker의 번호 K, 
+
+예외처리) countList의 원소는 음수여서는 안된다(assert 처리).
+
+특이사항)
+** 현재 구현은 프로젝트에 files 폴더를 사전에 만들고 input 데이터를 넣어놓아야 한다. 만일 gensort와 shell script로 정렬할 데이터를 즉석에서 생성한다면, 이에 대한 추가구현이 필요하다.
+
+(필요) merge(targetSeq : Seq[String], linesPerChunk : Int, output : String): Future[string] =
+기능) targetSeq의 정렬된 데이터들을 merge후 output 파일에 작성한다. Future[string]을 내보내서 정렬 완료를 알리며, "정렬이 끝나면" 청크들을 삭제한다.
+
+변수설명)
+targetSeq = 정렬할 파일들의 경로 목록
+linesPerChunk = 청크 하나당 기록된 최대 데이터 개수.
+output = 작성할 파일의 절대경로.
+
+특이사항) 이미 output string이 존재할 경우 에러가 발생한다. 필요시 쉘 스크립트로 output.txt를 미리 삭제하는 과정이 필요하다.
+
+필요 테스트)
+1. 파일 크기가 균등할 경우 = 통과
+2. 파일 크기가 불균등할 경우
+3. 도중에 빈 파일이 있을 경우
+4. 모든 파일이 빈 파일일 경우...
+5. targetSeq 길이가 0인 경우 = assert 처리. 
+**
+
+
+

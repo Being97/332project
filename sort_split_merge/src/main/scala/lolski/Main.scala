@@ -6,13 +6,13 @@ import scala.concurrent.{ExecutionContext, Future}
 object AppConf {
   // input
   val baseTmp       = s"${IO.getCwd}/files"
-  val in            = s"${baseTmp}/in.txt" // input file (unsorted)
+  val in            = s"${baseTmp}/intestlarge.txt" // input file (unsorted)
   val out           = s"${baseTmp}/out.txt" // output file (sorted)
 
   // sorting params
   val start         = 1
   val stop          = 10004
-  val linesPerChunk = 1000
+  val linesPerChunk = 10000
   val parallelism   = 8
 
 }
