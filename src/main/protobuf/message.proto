@@ -18,4 +18,5 @@ message ConnectionRequestMsg {
 // Master -> Worker / Worker -> Master
 message ConnectionDoneMsg {
   bool isConnected = 1;
+  int32 workerId = 2;
 }

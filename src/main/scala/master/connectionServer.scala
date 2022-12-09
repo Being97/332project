@@ -39,15 +39,16 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
 
   private class ConnectionImpl extends ConnectionGrpc.Connection {
     override def initConnect(req: ConnectionRequestMsg) = {
-      val reply = ConnectionDoneMsg(isConnected = true)
       System.out.println("Client IP : " + req.workerIP + " Connected")
       workerListBuffer += req.workerIP
+      
       if (workerListBuffer.size == numWorkers) {
         workerList = workerListBuffer.toList.sorted
         System.out.println(workerList)
         logger.info("all workers connected")
       }
-      Future.successful(reply)
+      
+      Future.successful(new ConnectionDoneMsg(isConnected = true, workerId = workerListBuffer.size - 1))
     }
   }
 

@@ -7,7 +7,6 @@ import io.grpc.{StatusRuntimeException, ManagedChannelBuilder, ManagedChannel}
 
 object Worker {
   private val logger = Logger.getLogger(classOf[ConnectionClient].getName)
-
   val usage = "Usage: worker [masterIP]"
 
   def main(args: Array[String]): Unit = {

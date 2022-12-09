@@ -12,7 +12,8 @@ class ConnectionClient(host: String, port: Int){
   val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
   val blockingStub = ConnectionGrpc.blockingStub(channel)
   val logger = Logger.getLogger(classOf[ConnectionClient].getName)
-  
+  var id: Int = -1
+
   def shutdown(): Unit = {
     channel.shutdown.awaitTermination(100, TimeUnit.SECONDS)
   }
@@ -27,6 +28,10 @@ class ConnectionClient(host: String, port: Int){
     val request = ConnectionRequestMsg(workerIP = workerIP)
     try {
       val response = blockingStub.initConnect(request)
+
+      id = response.workerId
+      logger.info("My ID : " + id)
+
       if (response.isConnected)
         logger.info("Connection Successed")
     }
