@@ -5,7 +5,7 @@ package connection;
 // The greeting service definition.
 service Connection {
   // Request and Response Connection between master and worker
-  rpc SayHello (ConnectionRequestMsg) returns (ConnectionDoneMsg) {}
+  rpc InitConnect (ConnectionRequestMsg) returns (ConnectionDoneMsg) {}
 }
 
 // The request message containing the worker's IP Address.
@@ -15,7 +15,7 @@ message ConnectionRequestMsg {
 }
 
 // The response message indicating connection is made
-// Master -> Worker
+// Master -> Worker / Worker -> Master
 message ConnectionDoneMsg {
   bool isConnected = 1;
 }
