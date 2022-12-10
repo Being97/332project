@@ -64,8 +64,6 @@ class ConnectionClient(host: String, port: Int){
     val sampleSize = 10000
     try {
       val dir = new File(s"$inputDir/input")
-      System.out.println("---Debug ---")
-      System.out.println(dir.list().head)
 
       assert(!dir.listFiles.isEmpty)
 /*

@@ -268,6 +268,24 @@ object WorkerTool{
       (for(i <- 0 to ChunkN -1) yield s"$tmp/chunk-$myNum-$i-$receiver").toSeq
     }
 
+  def makeKeyTool_master(workerN :Int, inDir:String): List[String] =
+    {
+      def openOnefileAndGetAllData(path : String): List[String] ={
+        val (handle, lines) = IO.readLines(path)
+        val out = lines.toList
+        handle.close()
+        out
+      }
+      val samplePath = (for(i <- 0 to workerN - 1) yield s"$inDir/sample$i").toList
+      val total_data = samplePath flatMap {
+        case path =>
+          openOnefileAndGetAllData(path)
+      }
+      val sorted_total_data = total_data.sortWith(f10byteCompare).map(_.toString)
+      val result = (for(num <- 1 to workerN - 1) yield sorted_total_data(num * 10000 -1) ).toList
+      result
+    }
+
 }
 
 
