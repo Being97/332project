@@ -18,8 +18,10 @@ object Worker {
     try {
       logger.info("My IP: " + InetAddress.getLocalHost.getHostAddress)
       
+      // Connect
       client.connectionRequest(workerIP = InetAddress.getLocalHost.getHostAddress)
 
+      // Sample
       client.sample
 
       // Send SampleRequest
