@@ -42,19 +42,18 @@ object WorkerTool{
     seq
   }
 
-  def sampleSortTool(chunks: Seq[String], tmpDir: String, partitonKey: List[String], myNum :Int): String = {
+  def sampleSortTool(chunks: Seq[String], inputDir: String, outputDir :String, myNum :Int): String = {
 
     // sample
-    val sample = sampleStep(chunks,tmpDir, myNum)
+    val sample = sampleStep(chunks,inputDir, outputDir, myNum)
     // sort each chunk locally, in parallel
-    val sorted = sortStep(chunks)
+    val sorted = sortStep(chunks, inputDir)
     sample
   }
 
   def PartitonTool(chunks_sorted: Seq[String], tmpDir: String, partitonKey: List[String], output: String, linesPerChunk: Int, myNum: Int): Seq[String] = {
 
     val split = PartitionStep(chunks_sorted, partitonKey)
-    IO.delete(chunks_sorted)
     split
   }
 
@@ -75,7 +74,7 @@ object WorkerTool{
 
   def removeChunkTool(target: Seq[String])=
   {
-    IO.delete(target)
+    IO.delete(target.toList)
   }
 
   def checkIsSortedTool(target: Seq[String]): Boolean =
@@ -94,18 +93,17 @@ object WorkerTool{
 
     }
 
-  def sampleStep(chunks: Seq[String], tmp: String,myNum: Int): String = {
+  def sampleStep(chunks: Seq[String], inTmp: String, outTmp:String, myNum: Int): String = {
 
     val count = 10100/chunks.length
     val sampleSeq = chunks flatMap { case in =>
-      val (handle, lines) = IO.readLines(in)
+      val (handle, lines) = IO.readLines(s"$inTmp/$in")
       val data = Random.shuffle(lines.toList).take(count)
       handle.close()
       data
     }
-
-    val outpath = s"$tmp/sample-$myNum"
-    IO.writeSeq(sampleSeq.take(10000), outpath, true)
+    val outpath = s"$outTmp/sample"
+    IO.writeSeq(sampleSeq.take(10000).toList, outpath, true)
     outpath
   }
 
@@ -124,8 +122,8 @@ object WorkerTool{
     chunks
   }
 
-  def sortStep(chunks: Seq[String]): Seq[String] = {
-    val async  = chunks map { path => sortChunk(path) }
+  def sortStep(chunks: Seq[String], inTmp:String): Seq[String] = {
+    val async  = chunks map { path => sortChunk(s"$inTmp/$path") }
     async
   }
 

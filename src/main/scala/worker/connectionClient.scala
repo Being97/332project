@@ -1,5 +1,7 @@
 package worker
 
+import WorkerTool._
+
 import java.util.concurrent.TimeUnit
 import java.util.logging.{Level, Logger}
 import java.net.InetAddress
@@ -7,12 +9,13 @@ import java.io.FileInputStream
 import java.io.{File, IOException}
 import scala.io.Source
 import io.grpc.Status
-import scala.concurrent.{Promise}
+import System.out._
 
+import scala.concurrent.Promise
 import connection.message._
 import connection.message.ConnectionGrpc.ConnectionBlockingStub
 import connection.message.ConnectionGrpc.ConnectionStub
-import io.grpc.{StatusRuntimeException, ManagedChannelBuilder, ManagedChannel}
+import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import io.grpc.stub.StreamObserver
 import com.google.protobuf.ByteString
 
@@ -60,8 +63,12 @@ class ConnectionClient(host: String, port: Int){
     logger.info("[Sample] Sample start")
     val sampleSize = 10000
     try {
-      val dir = new File(inputDir)
+      val dir = new File(s"$inputDir/input")
+      System.out.println("---Debug ---")
+      System.out.println(dir.list().head)
+
       assert(!dir.listFiles.isEmpty)
+/*
       val sampleSource = Source.fromFile(dir.listFiles.toList.head)
       val sampleWriter = new PrintWriter(new File(inputDir + "/sample"))
 
@@ -71,7 +78,15 @@ class ConnectionClient(host: String, port: Int){
 
       sampleSource.close
       sampleWriter.close
+  */
 
+      val samplepath =  WorkerTool.sampleSortTool(
+        chunks = dir.list(),
+        s"$inputDir/input",
+        s"$inputDir/samples",
+        myNum = id
+      )
+      //System.out.println(samplepath)
     } catch {
       case exception: Exception => println(exception)
     }
@@ -103,7 +118,7 @@ class ConnectionClient(host: String, port: Int){
     val requestObserver = asyncStub.sample(responseObserver)
 
     try {
-      val source = Source.fromFile(inputDir + "/sample")
+      val source = Source.fromFile(inputDir + "/samples/sample")
       for (line <- source.getLines) {
         val request = SampleTransfer(workerId = id, sampledData = ByteString.copyFromUtf8(line+"\r\n"))
         requestObserver.onNext(request)

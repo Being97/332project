@@ -26,7 +26,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     println(s"start sorting file ${AppConf.in}...")
 
-    /*
+    Wok
     val ChunkName =  WorkerTool.splitTool(
       input = AppConf.in,
       tmpDir = AppConf.baseTmp,
@@ -70,13 +70,12 @@ object Main {
     val success2 = WorkerTool.checkIsSortedTool(List(AppConf.out))
     print(success2)
     print("\n")
-    */
+
 
     println(s"end sorting file ${AppConf.in}...")
 
   }
 }
+
+
 */
- */
-
-
