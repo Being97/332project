@@ -36,6 +36,7 @@ class ConnectionClient(host: String, port: Int){
   val workersIP = Map[Int, String]()
   val pivots = Map[Int, String]()
 
+  var shuffleServerHandler: ShuffleServerHandler = null
 
   def shutdown(): Unit = {
     channel.shutdown.awaitTermination(100, TimeUnit.SECONDS)
@@ -177,5 +178,47 @@ class ConnectionClient(host: String, port: Int){
     )
 
     logger.info("[Partition] Partition done")
+  }
+
+  def partitioned(): Unit = {
+    logger.info("[Partitioned] Partitioned start")
+    val partitionedResponse = blockingStub.partitioned(new PartitionedRequest(id))
+    logger.info("[Partitioned] Partitioned done")
+  }
+
+  def shuffleServer(port: Int): Unit = {
+    logger.info("[ShuffleServer] ShuffleServer start")
+    val tempDir = new File(inputDir + "/shuffled" + id)
+    if (!tempDir.mkdir) throw new IOException("Could not create temporary directory: " + tempDir.getAbsolutePath)
+    assert(tempDir.isDirectory)
+    shuffleServerHandler = new ShuffleServerHandler(port, id, tempDir.getAbsolutePath)
+    shuffleServerHandler.serverStart
+    logger.info("[ShuffleServer] ShuffleServer done")
+  }
+
+  def requestShuffle(): Unit = {
+    logger.info("[requestShuffle] Waiting shuffle order")
+
+    val shuffleResponse = blockingStub.shuffleTry(new ShuffleTryRequest(true))
+    shuffleResponse.status match {
+      case StatusEnum.SUCCESS => {
+        logger.info("[requestShuffle] Shuffle order fire")
+      }
+      case StatusEnum.FAIL => {
+        logger.info("[requestShuffle] Shuffle failed.")
+        throw new Exception
+      }
+      case _ => {
+        /* Wait 5 seconds and retry */
+        Thread.sleep(5 * 1000)
+        requestShuffle
+      }
+    }
+  }
+
+  def shuffle(): Unit = {
+    logger.info("[Shuffle] Shuffle start")
+    shuffleServerHandler.shuffle(workersIP)
+    logger.info("[Shuffle] Shuffle done")
   }
 }

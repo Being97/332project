@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString
 
 import message.shuffle.StatusEnum
 import message.shuffle.{ShuffleGrpc, ShuffleRequest, ShuffleDone}
-import common._
+//import common._
 
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger

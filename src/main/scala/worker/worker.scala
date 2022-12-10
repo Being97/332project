@@ -12,7 +12,11 @@ object Worker {
   val usage = "Usage: worker [masterIP]"
 
   def main(args: Array[String]): Unit = {
-    val masterIP = args.headOption.getOrElse("localhost")
+    // argsExample = "slave 141.223.181.67:50051 -I /src/main/resources/input -O /src/main/resources/sorted"
+    // worker [server ip:port] -I [input directory] -O [output directory]
+    val masterIP = args(0)
+    val shufflingPort = args(1)
+
     logger.info("masterIP : " + masterIP)
     val client = new ConnectionClient(masterIP, 50051)
     try {
@@ -29,12 +33,23 @@ object Worker {
       client.sampleDataTransfer(samplePromise)
       Await.ready(samplePromise.future, Duration.Inf)
 
-      // request pivotting
+      // Request pivot
       client.requestPivot
 
-      // Partitioning
+      // Partition
       client.partition
 
+      // Send partitioned
+      client.partitioned
+
+      // Start server for shuffle
+      client.shuffleServer(shufflingPort.toInt)
+
+      // Request shuffle order
+      client.requestShuffle
+
+      // shuffle
+      client.shuffle
 
     } finally {
       client.awaitTermination()

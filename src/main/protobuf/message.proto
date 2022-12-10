@@ -14,6 +14,8 @@ service Connection {
   rpc InitConnect (ConnectionRequestMsg) returns (ConnectionDoneMsg) {}
   rpc Sample (stream SampleTransfer) returns (SampleDone) {}
   rpc Pivot (PivotRequest) returns (PivotDone) {}
+  rpc Partitioned (PartitionedRequest) returns (PartitionedDone) {}
+  rpc ShuffleTry (ShuffleTryRequest) returns (ShuffleTryDone) {}
 }
 
 // The request message containing the worker's IP Address.
@@ -55,3 +57,28 @@ message PivotDone {
   repeated string workerIPList = 2;
   repeated string pivotsList = 3;
 }
+
+// Request Partition Done
+// Worker -> Master
+message PartitionedRequest {
+  int32 workerID = 1;
+}
+
+// Partition Response
+// Master -> Worker
+message PartitionedDone {
+  bool isOk = 1;
+}
+
+// Request Shuffle Order
+// Worker -> Master
+message ShuffleTryRequest {
+  bool isRequested = 1;
+}
+
+// Shuffle Response
+// Master -> Worker
+message ShuffleTryDone {
+  StatusEnum status = 1;
+}
+

@@ -21,6 +21,7 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
   val outputDir = System.getProperty("user.dir") + "/src/main/resources/master"
   var state: MASTERSTATE = MASTERREADY
   var sampledWorkerCount: Int = 0
+  var partitionedWorkerCount: Int = 0
   var pivotList: List[String] = null
 
   def start(): Unit = {
@@ -116,6 +117,32 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
       }
       case _ => {
         Future.successful(new PivotDone(status = StatusEnum.PROGRESS))
+      }
+    }
+
+    override def partitioned(req: PartitionedRequest) = {
+      logger.info("Worker " + req.workerID + " is Partitioned")
+      partitionedWorkerCount += 1
+      
+      if (partitionedWorkerCount == numWorkers) {
+        logger.info("all workers Partitioned")
+        state = PARTITIONED
+      }
+      
+      Future.successful(new PartitionedDone(isOk = true))
+    }  
+
+    override def shuffleTry(request: ShuffleTryRequest): Future[ShuffleTryDone] = state match {
+      case PARTITIONED => {
+        Future.successful(new ShuffleTryDone(
+          status = StatusEnum.SUCCESS,
+        ))
+      }
+      case FAILED => {
+        Future.failed(new Exception)
+      }
+      case _ => {
+        Future.successful(new ShuffleTryDone(status = StatusEnum.PROGRESS))
       }
     }
 

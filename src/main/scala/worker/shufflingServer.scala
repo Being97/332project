@@ -2,7 +2,7 @@ package worker
 
 import message.shuffle.StatusEnum
 import message.shuffle.{ShuffleGrpc, ShuffleRequest, ShuffleDone}
-import common._
+// import common._
 
 import java.util.logging.Logger
 import java.util.concurrent.TimeUnit
@@ -12,6 +12,8 @@ import io.grpc.stub.StreamObserver;
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+
+import java.io.{OutputStream, FileOutputStream, File}
 
 class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, tempDir: String) { self =>
   var server: Server = null
@@ -26,7 +28,7 @@ class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, te
     sys.addShutdownHook {
       System.err.println("Shutting down ShufflingServer since JVM is shutting down")
       self.stop()
-      System.err.println("File server shut down")
+      System.err.println("ShufflingServer shut down")
     }
   }
 
@@ -58,7 +60,7 @@ class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, te
             fos = new FileOutputStream(file)
           }
 
-          request.data.writeTo(fos)
+          request.shuffleData.writeTo(fos)
           fos.flush()
         }
 
