@@ -2,11 +2,18 @@ syntax = "proto3";
 
 package connection;
 
+enum StatusEnum {
+  PROGRESS = 0;
+  SUCCESS = 1;
+  FAIL = 2;
+}
+
 // The greeting service definition.
 service Connection {
   // Request and Response Connection between master and worker
   rpc InitConnect (ConnectionRequestMsg) returns (ConnectionDoneMsg) {}
   rpc Sample (stream SampleTransfer) returns (SampleDone) {}
+  rpc Pivot (PivotRequest) returns (PivotDone) {}
 }
 
 // The request message containing the worker's IP Address.
@@ -33,4 +40,18 @@ message SampleTransfer {
 // Master -> Worker
 message SampleDone {
   bool successed = 1;
+}
+
+// Request Pivot
+// Worker -> Master
+message PivotRequest {
+  bool isRequested = 1;
+}
+
+// Pivot Response
+// Master -> Worker
+message PivotDone {
+  StatusEnum status = 1;
+  repeated string workerIPList = 2;
+  repeated string pivotsList = 3;
 }

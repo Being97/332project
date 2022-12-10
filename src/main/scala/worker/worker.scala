@@ -29,6 +29,10 @@ object Worker {
       client.sampleDataTransfer(samplePromise)
       Await.ready(samplePromise.future, Duration.Inf)
 
+      // request pivotting
+      client.requestPivot
+
+
     } finally {
       client.awaitTermination()
       // client.shutdown()

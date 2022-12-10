@@ -10,14 +10,17 @@ import io.grpc.Status
 import java.io.{OutputStream, FileOutputStream, File}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.mutable.ListBuffer
+import WorkerTool._
 
 class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port: Int) { self =>
   private[this] var server: Server = null
   private var workerListBuffer: ListBuffer[String] = new ListBuffer[String]()
   private var workerList: List[String] = null
   private val logger = Logger.getLogger(classOf[ConnectionServer].getName)
-
+  
   val outputDir = System.getProperty("user.dir") + "/src/main/resources/master"
+  var state: MASTERSTATE = MASTERREADY
+  var sampledWorkerCount: Int = 0
 
   def start(): Unit = {
     server = ServerBuilder.forPort(port).addService(ConnectionGrpc.bindService(new ConnectionImpl, executionContext)).build.start
@@ -41,6 +44,15 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
     }
   }
 
+  def tryPivot(): Unit = {
+    if (sampledWorkerCount == numWorkers) {
+      logger.info(s"[tryPivot]: All workers sent sample. Start pivot.")
+
+      // makeKeyTool_master
+      state = PIVOTED
+    }
+  }
+  
   private class ConnectionImpl extends ConnectionGrpc.Connection {
     override def initConnect(req: ConnectionRequestMsg) = {
       System.out.println("Client IP : " + req.workerIP + " Connected")
@@ -50,6 +62,7 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
         workerList = workerListBuffer.toList
         System.out.println(workerList)
         logger.info("all workers connected")
+        state = CONNECTED
       }
       
       Future.successful(new ConnectionDoneMsg(isConnected = true, workerId = workerListBuffer.size - 1))
@@ -81,9 +94,29 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
           fos.close()
           responseObserver.onNext(new SampleDone(successed = true))
           responseObserver.onCompleted
+
+          sampledWorkerCount += 1
+          tryPivot
         }
       }
     }
+
+    override def pivot(request: PivotRequest): Future[PivotDone] = state match {
+      case PIVOTED => {
+        Future.successful(new PivotDone(
+          status = StatusEnum.SUCCESS,
+          workerIPList = workerList.toSeq,
+          pivotsList = workerList.toSeq
+        ))
+      }
+      case FAILED => {
+        Future.failed(new Exception)
+      }
+      case _ => {
+        Future.successful(new PivotDone(status = StatusEnum.PROGRESS))
+      }
+    }
+
   }
   
 }

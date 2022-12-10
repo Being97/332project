@@ -10,6 +10,8 @@ import java.io.{File, IOException}
 import scala.io.Source
 import io.grpc.Status
 import System.out._
+import WorkerTool._
+import scala.collection.mutable.Map
 
 import scala.concurrent.Promise
 import connection.message._
@@ -30,6 +32,10 @@ class ConnectionClient(host: String, port: Int){
 
   val inputDir = System.getProperty("user.dir") + "/src/main/resources/worker"
   var id: Int = -1
+
+  val workersIP = Map[Int, String]()
+  val pivots = Map[Int, String]()
+
 
   def shutdown(): Unit = {
     channel.shutdown.awaitTermination(100, TimeUnit.SECONDS)
@@ -59,7 +65,7 @@ class ConnectionClient(host: String, port: Int){
   }
 
   // sample 10000 data line
-  final def sample(): Unit = {
+  def sample(): Unit = {
     logger.info("[Sample] Sample start")
     val sampleSize = 10000
     try {
@@ -128,5 +134,35 @@ class ConnectionClient(host: String, port: Int){
     }
     // Mark the end of requests
     requestObserver.onCompleted()
+  }
+
+  def requestPivot(): Unit = {
+    logger.info("[requestPivot] Try to get pivot")
+
+    val pivotResponse = blockingStub.pivot(new PivotRequest(true))
+    pivotResponse.status match {
+      case StatusEnum.SUCCESS => {
+
+        for (w <- pivotResponse.workerIPList) {
+          workersIP(workersIP.size + 1) = w
+        }
+        
+        for (w <- pivotResponse.pivotsList) {
+          pivots(pivots.size + 1) = w
+        }
+
+        System.out.println("WORKERS IP : " + workersIP)
+        System.out.println("pivots : " + pivots)
+      }
+      case StatusEnum.FAIL => {
+        logger.info("[requestPivot] Pivot failed.")
+        throw new Exception
+      }
+      case _ => {
+        /* Wait 5 seconds and retry */
+        Thread.sleep(5 * 1000)
+        requestPivot
+      }
+    }
   }
 }
