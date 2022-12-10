@@ -2,6 +2,8 @@ package worker
 
 import java.net.InetAddress
 import java.util.logging.Logger
+import scala.concurrent.{ExecutionContext, Promise, Await}
+import scala.concurrent.duration._
 
 import io.grpc.{StatusRuntimeException, ManagedChannelBuilder, ManagedChannel}
 
@@ -15,7 +17,14 @@ object Worker {
     val client = new ConnectionClient(masterIP, 50051)
     try {
       logger.info("My IP: " + InetAddress.getLocalHost.getHostAddress)
+      
       client.connectionRequest(workerIP = InetAddress.getLocalHost.getHostAddress)
+
+      // Send SampleRequest
+      val samplePromise = Promise[Unit]()
+      client.sampleDataTransfer(samplePromise)
+      Await.ready(samplePromise.future, Duration.Inf)
+
     } finally {
       client.awaitTermination()
       // client.shutdown()

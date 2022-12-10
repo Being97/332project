@@ -4,8 +4,10 @@ import java.util.logging.Logger
 import java.net.InetAddress
 
 import io.grpc.{Server, ServerBuilder}
-import connection.message.{ConnectionGrpc, ConnectionRequestMsg, ConnectionDoneMsg}
-
+import io.grpc.stub.StreamObserver
+import connection.message._
+import io.grpc.Status
+import java.io.{OutputStream, FileOutputStream, File}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.mutable.ListBuffer
 
@@ -14,6 +16,8 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
   private var workerListBuffer: ListBuffer[String] = new ListBuffer[String]()
   private var workerList: List[String] = null
   private val logger = Logger.getLogger(classOf[ConnectionServer].getName)
+
+  val outputDir = System.getProperty("user.dir") + "/src/main/resources/master"
 
   def start(): Unit = {
     server = ServerBuilder.forPort(port).addService(ConnectionGrpc.bindService(new ConnectionImpl, executionContext)).build.start
@@ -43,12 +47,46 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
       workerListBuffer += req.workerIP
       
       if (workerListBuffer.size == numWorkers) {
-        workerList = workerListBuffer.toList.sorted
+        workerList = workerListBuffer.toList
         System.out.println(workerList)
         logger.info("all workers connected")
       }
       
       Future.successful(new ConnectionDoneMsg(isConnected = true, workerId = workerListBuffer.size - 1))
+    }
+
+    override def sample(responseObserver: StreamObserver[SampleDone]): StreamObserver[SampleTransfer] = {
+    
+      logger.info("[sample]: Worker tries to send sample")
+      new StreamObserver[SampleTransfer] {
+        var fos: FileOutputStream = null
+
+        override def onNext(request: SampleTransfer): Unit = {
+
+          System.out.println(request.sampledData)
+          
+          if (fos == null) {
+              val file = new File("sample1")
+              fos = new FileOutputStream(file)
+          }
+
+          request.sampledData.writeTo(fos)
+          fos.flush()
+        }
+
+        override def onError(t: Throwable): Unit = {
+          logger.warning("[sample]: Worker failed to send sample")
+          throw t
+        }
+
+        override def onCompleted(): Unit = {
+          logger.info("[sample]: Worker done sending sample")
+
+          fos.close()
+          responseObserver.onNext(new SampleDone(successed = true))
+          responseObserver.onCompleted
+        }
+      }
     }
   }
 

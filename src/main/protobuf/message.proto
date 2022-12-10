@@ -6,6 +6,7 @@ package connection;
 service Connection {
   // Request and Response Connection between master and worker
   rpc InitConnect (ConnectionRequestMsg) returns (ConnectionDoneMsg) {}
+  rpc Sample (stream SampleTransfer) returns (SampleDone) {}
 }
 
 // The request message containing the worker's IP Address.
@@ -19,4 +20,16 @@ message ConnectionRequestMsg {
 message ConnectionDoneMsg {
   bool isConnected = 1;
   int32 workerId = 2;
+}
+
+// Transfer 1MB Sampled Data
+// Worker -> Master
+message SampleTransfer {
+  bytes sampledData = 1;
+}
+
+// Sample Done message
+// Master -> Worker
+message SampleDone {
+  bool successed = 1;
 }
