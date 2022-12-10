@@ -56,17 +56,13 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
     }
 
     override def sample(responseObserver: StreamObserver[SampleDone]): StreamObserver[SampleTransfer] = {
-    
       logger.info("[sample]: Worker tries to send sample")
       new StreamObserver[SampleTransfer] {
         var fos: FileOutputStream = null
 
         override def onNext(request: SampleTransfer): Unit = {
-
-          System.out.println(request.sampledData)
-          
           if (fos == null) {
-              val file = new File("sample1")
+              val file = new File(outputDir + "/sample" + request.workerId)
               fos = new FileOutputStream(file)
           }
 

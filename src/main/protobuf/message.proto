@@ -25,7 +25,8 @@ message ConnectionDoneMsg {
 // Transfer 1MB Sampled Data
 // Worker -> Master
 message SampleTransfer {
-  bytes sampledData = 1;
+  int32 workerId = 1;
+  bytes sampledData = 2;
 }
 
 // Sample Done message

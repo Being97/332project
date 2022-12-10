@@ -20,6 +20,8 @@ object Worker {
       
       client.connectionRequest(workerIP = InetAddress.getLocalHost.getHostAddress)
 
+      client.sample
+
       // Send SampleRequest
       val samplePromise = Promise[Unit]()
       client.sampleDataTransfer(samplePromise)

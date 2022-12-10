@@ -34,6 +34,10 @@ class ConnectionClient(host: String, port: Int){
     channel.awaitTermination(100, TimeUnit.SECONDS)
   }
 
+  def sample(){
+    logger.info("sample")
+  }
+
   /** request connection to master. */
   def connectionRequest(workerIP: String): Unit = {
     logger.info("Will try to connect to master")
@@ -77,9 +81,9 @@ class ConnectionClient(host: String, port: Int){
     val requestObserver = asyncStub.sample(responseObserver)
 
     try {
-      val source = Source.fromFile("file")
+      val source = Source.fromFile(inputDir + "/sample")
       for (line <- source.getLines) {
-        val request = SampleTransfer(sampledData = ByteString.copyFromUtf8(line+"\r\n"))
+        val request = SampleTransfer(workerId = id, sampledData = ByteString.copyFromUtf8(line+"\r\n"))
         requestObserver.onNext(request)
       }
       source.close
