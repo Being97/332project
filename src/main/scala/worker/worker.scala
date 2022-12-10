@@ -32,6 +32,9 @@ object Worker {
       // request pivotting
       client.requestPivot
 
+      // Partitioning
+      client.partition
+
 
     } finally {
       client.awaitTermination()

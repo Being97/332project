@@ -21,6 +21,7 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
   val outputDir = System.getProperty("user.dir") + "/src/main/resources/master"
   var state: MASTERSTATE = MASTERREADY
   var sampledWorkerCount: Int = 0
+  var pivotList: List[String] = null
 
   def start(): Unit = {
     server = ServerBuilder.forPort(port).addService(ConnectionGrpc.bindService(new ConnectionImpl, executionContext)).build.start
@@ -47,8 +48,8 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
   def tryPivot(): Unit = {
     if (sampledWorkerCount == numWorkers) {
       logger.info(s"[tryPivot]: All workers sent sample. Start pivot.")
-
-      // makeKeyTool_master
+      pivotList = WorkerTool.makeKeyTool_master(workerList.length, outputDir)
+      
       state = PIVOTED
     }
   }
@@ -97,6 +98,7 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
 
           sampledWorkerCount += 1
           tryPivot
+          logger.info("[tryPivot]: Master done sending pivot")
         }
       }
     }
@@ -106,7 +108,7 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
         Future.successful(new PivotDone(
           status = StatusEnum.SUCCESS,
           workerIPList = workerList.toSeq,
-          pivotsList = workerList.toSeq
+          pivotsList = pivotList
         ))
       }
       case FAILED => {

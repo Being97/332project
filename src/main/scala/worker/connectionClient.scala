@@ -150,9 +150,6 @@ class ConnectionClient(host: String, port: Int){
         for (w <- pivotResponse.pivotsList) {
           pivots(pivots.size + 1) = w
         }
-
-        System.out.println("WORKERS IP : " + workersIP)
-        System.out.println("pivots : " + pivots)
       }
       case StatusEnum.FAIL => {
         logger.info("[requestPivot] Pivot failed.")
@@ -164,5 +161,21 @@ class ConnectionClient(host: String, port: Int){
         requestPivot
       }
     }
+  }
+
+  def partition(): Unit = {
+    logger.info("[Partition] Partition start")
+
+    val dir = new File(s"$inputDir/input")
+
+    WorkerTool.PartitonTool(
+      chunks_sorted = dir.list(),
+      partitonKey = pivots.map{case(n, p) => p}.toList,
+      inTmp = inputDir + "/input",
+      outTmp = inputDir + "/partition",
+      myNum = id
+    )
+
+    logger.info("[Partition] Partition done")
   }
 }
