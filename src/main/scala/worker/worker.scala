@@ -15,7 +15,6 @@ object Worker {
     // argsExample = "slave 141.223.181.67:50051 -I /src/main/resources/input -O /src/main/resources/sorted"
     // worker [server ip:port] -I [input directory] -O [output directory]
     val masterIP = args(0)
-    val shufflingPort = args(1)
 
     logger.info("masterIP : " + masterIP)
     val client = new ConnectionClient(masterIP, 50051)
@@ -43,7 +42,7 @@ object Worker {
       client.partitioned
 
       // Start server for shuffle
-      client.shuffleServer(shufflingPort.toInt)
+      client.shuffleServer
 
       // Request shuffle order
       client.requestShuffle

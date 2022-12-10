@@ -186,12 +186,12 @@ class ConnectionClient(host: String, port: Int){
     logger.info("[Partitioned] Partitioned done")
   }
 
-  def shuffleServer(port: Int): Unit = {
+  def shuffleServer(): Unit = {
     logger.info("[ShuffleServer] ShuffleServer start")
     val tempDir = new File(inputDir + "/shuffled" + id)
     if (!tempDir.mkdir) throw new IOException("Could not create temporary directory: " + tempDir.getAbsolutePath)
     assert(tempDir.isDirectory)
-    shuffleServerHandler = new ShuffleServerHandler(port, id, tempDir.getAbsolutePath)
+    shuffleServerHandler = new ShuffleServerHandler(50052, id, tempDir.getAbsolutePath)
     shuffleServerHandler.serverStart
     logger.info("[ShuffleServer] ShuffleServer done")
   }
