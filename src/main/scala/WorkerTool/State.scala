@@ -9,4 +9,4 @@ case object FAILED extends MASTERSTATE
 trait WORKERSTATE
 case object WORKERREADY extends WORKERSTATE
 case object SAMPLED extends WORKERSTATE
-
+case object PARTITIONED extends WORKERSTATE
