@@ -51,9 +51,9 @@ object WorkerTool{
     sample
   }
 
-  def PartitonTool(chunks_sorted: Seq[String], tmpDir: String, partitonKey: List[String], output: String, linesPerChunk: Int, myNum: Int): Seq[String] = {
+  def PartitonTool(chunks_sorted: Seq[String], partitonKey: List[String], inTmp:String, outTmp:String, myNum:Int): Seq[String] = {
 
-    val split = PartitionStep(chunks_sorted, partitonKey)
+    val split = PartitionStep(chunks_sorted, partitonKey, inTmp, outTmp, myNum)
     split
   }
 
@@ -127,7 +127,7 @@ object WorkerTool{
     async
   }
 
-  def PartitionStep(chunks: Seq[String], sampleKey :List[String]) = {
+  def PartitionStep(chunks: Seq[String], sampleKey :List[String], inTmp:String, outTmp:String, myNum:Int) = {
 
     def compareKey(sampleKey: List[String], elem: String): Int = {
       @tailrec
@@ -141,15 +141,15 @@ object WorkerTool{
       compKeyIter(0, sampleKey, elem)
     }
 
-    def splitbyKey(in: String): List[String] = {
-      val (handle, lines) = IO.readLines(in)
+    def splitbyKey(in: String, fileN: Int): List[String] = {
+      val (handle, lines) = IO.readLines(s"$inTmp/$in")
       val chunk_pos = lines.toList.map{case str=>
         val key =compareKey(sampleKey, str)
         (key, str)
       }
       val chunk_group = chunk_pos.groupBy(_._1)
       val chunks = chunk_group map { case (id, chunk) =>
-        val out = s"$in-$id" // chunk name
+        val out = s"$outTmp/Chunk-$myNum-$fileN-$id" // chunk name
         IO.writeSeq(chunk.map(_._2), out, shouldOverwrite = true)
         out
       } toList
@@ -157,10 +157,10 @@ object WorkerTool{
       handle.close()
       chunks
     }
-
-    chunks.flatMap {
-      case path =>
-        splitbyKey(path)
+    chunks.zipWithIndex
+      .flatMap {
+      case (fname, fileN) =>
+        splitbyKey(fname, fileN)
     }
   }
 
