@@ -57,20 +57,36 @@ object WorkerTool{
     split
   }
 
-  def mergeTool(countList: List[Int], tmp: String, myNum: Int, linesPerChunk : Int, output : String): String ={
-    val targetSeq = ChunkPathGenerator(countList: List[Int], tmp: String, myNum: Int)
+  def mergeTool(targetSeq: List[Stirng], inTmp: String, outTmp:String, myNum: Int, linesPerChunk : Int): String ={
+    //val targetSeq = ChunkPathGenerator(countList: List[Int], tmp: String, myNum: Int)
     val n = max(1, linesPerChunk / targetSeq.size)
-    val merge = mergeStep(targetSeq, output, n)
+    val merge = mergeStep(targetSeq, output, n, inTmp)
     IO.delete(targetSeq.toList)
     merge
   }
 
+  def moveFileTool(targetSeq:List[String], inTmp: String, outTmp:String): Unit=
+    {
+      def moveFile(in:String):Unit ={
+        val (handle, lines) = IO.readLines(s"$inTmp/$in")
+        val out = s"$outTmp/$in"
+        val move = IO.writeSeq(lines, out, true)
+        handle.close()
+      }
+
+      chunks map {
+      case fname =>
+        moveFile(fname)
+    }
+
+/*
   def mergeTool_for_me(targetSeq : Seq[String], tmp: String, myNum: Int, linesPerChunk: Int, output: String): String = {
     val n = max(1, linesPerChunk / targetSeq.size)
     val merge = mergeStep(targetSeq, output, n)
     IO.delete(targetSeq.toList)
     merge
   }
+  */
 
   def removeChunkTool(target: Seq[String])=
   {
@@ -192,10 +208,10 @@ object WorkerTool{
   }
 
   // using k-way merging algorithm to merge sorted chunks
-  def mergeStep(chunks: Seq[String], out: String, linesPerChunk: Int): String = {
+  def mergeStep(chunks: Seq[String], out: String, linesPerChunk: Int, inTmp: String): String = {
     // initialize variables - priority queue, file readers
     val readers = chunks.zipWithIndex map { case (chunk, id) =>
-      val (handle, it) = IO.readLines(chunk)
+      val (handle, it) = IO.readLines(s"$inTmp/$chunk")
       // chunk id is used to idenfity which chunk reader to advance after dequeing an element from the queue
       val indexed = it map { e => nameId(e, id) }
       (handle, indexed)
