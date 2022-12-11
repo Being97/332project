@@ -251,7 +251,10 @@ class ConnectionClient(host: String, port: Int){
 
   def merge(): Unit = {
     logger.info("[Merge] Merge start")
-    // shuffleServerHandler.shuffle(workersIP)
+    val dir = new File(s"$inputDir/shuffled")
+    val dir2 = new File(s"$inputDir/result")
+    val linesPerChunk = 320000 / workersIP.toList.length
+    WorkerTool.mergeTool(dir.list().toList, dir.toString, dir2.toString, -1, linesPerChunk)
     logger.info("[Merge] Merge done")
   }
 }
