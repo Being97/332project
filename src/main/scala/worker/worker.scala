@@ -50,6 +50,12 @@ object Worker {
       // shuffle
       client.shuffle
 
+      // notice clients sent partition
+      client.shuffled
+
+      // request merge order
+      client.requestMerge
+
       // merge sort after shuffle
       client.merge
 

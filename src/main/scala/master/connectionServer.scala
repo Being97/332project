@@ -146,6 +146,31 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
       }
     }
 
+    override def shuffled(req: ShuffledRequest) = {
+      logger.info("Worker " + req.workerID + " is shuffled")
+      shuffledWorkerCount += 1
+      
+      if (shuffledWorkerCount == numWorkers) {
+        logger.info("all workers shuffled")
+        state = SHUFFLED
+      }
+      
+      Future.successful(new ShuffledDone(isOk = true))
+    }  
+
+    override def mergeTry(request: MergeTryRequest): Future[MergeTryDone] = state match {
+      case SHUFFLED => {
+        Future.successful(new MergeTryDone(
+          status = StatusEnum.SUCCESS,
+        ))
+      }
+      case FAILED => {
+        Future.failed(new Exception)
+      }
+      case _ => {
+        Future.successful(new MergeTryDone(status = StatusEnum.PROGRESS))
+      }
+    }
   }
   
 }

@@ -223,6 +223,31 @@ class ConnectionClient(host: String, port: Int){
     logger.info("[Shuffle] Shuffle done")
   }
 
+  def shuffled(): Unit = {
+    logger.info("[shuffled] shuffled start")
+    val shuffledResponse = blockingStub.shuffled(new ShuffledRequest(id))
+    logger.info("[shuffled] shuffled done")
+  }
+
+  def requestMerge(): Unit = {
+    logger.info("[requestmerge] Waiting merge order")
+
+    val mergeResponse = blockingStub.mergeTry(new MergeTryRequest(true))
+    mergeResponse.status match {
+      case StatusEnum.SUCCESS => {
+        logger.info("[requestmerge] merge order fire")
+      }
+      case StatusEnum.FAIL => {
+        logger.info("[requestmerge] merge failed.")
+        throw new Exception
+      }
+      case _ => {
+        /* Wait 5 seconds and retry */
+        Thread.sleep(5 * 1000)
+        requestMerge
+      }
+    }
+  }
 
   def merge(): Unit = {
     logger.info("[Merge] Merge start")
