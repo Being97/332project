@@ -22,6 +22,7 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
   var state: MASTERSTATE = MASTERREADY
   var sampledWorkerCount: Int = 0
   var partitionedWorkerCount: Int = 0
+  var shuffledWorkerCount: Int = 0
   var pivotList: List[String] = null
 
   def start(): Unit = {
