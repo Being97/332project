@@ -11,13 +11,13 @@ import connection.message._
 // import common.{WorkerInfo, FileHandler, loggerLevel}
 
 
-class ShuffleServerHandler(serverPort: Int, id: Int, tempDir: String) {
+class ShuffleServerHandler(serverPort: Int, id: Int, partitionDir: String, shuffledDir: String) {
   val logger = Logger.getLogger(classOf[ShuffleServerHandler].getName)  
 
   var server: ShufflingServer = null
 
   def serverStart(): Unit = {
-    server = new ShufflingServer(ExecutionContext.global, serverPort, id, tempDir)
+    server = new ShufflingServer(ExecutionContext.global, serverPort, id, shuffledDir)
     server.start
   }
 
@@ -30,6 +30,9 @@ class ShuffleServerHandler(serverPort: Int, id: Int, tempDir: String) {
 
   // to be implemented .. .. ...
   def shuffle(workersIP: Map[Int, String]): Unit = {
+
+    System.out.println(workersIP)
+
     /* Send partition to other workers */
     for {
       workerId <- (0 until workersIP.size)
@@ -39,7 +42,7 @@ class ShuffleServerHandler(serverPort: Int, id: Int, tempDir: String) {
       try {
         if (workerId != id) {
           val workerIP = workersIP(workerId)
-          client = new ShufflingClient(workerIP, 50052, id, tempDir)
+          client = new ShufflingClient(workerIP, 50052, id, partitionDir)
           client.shuffle(workerId)
         }
       } finally {

@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.io.{OutputStream, FileOutputStream, File}
 
-class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, tempDir: String) { self =>
+class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, shuffledDir: String) { self =>
   var server: Server = null
   val logger: Logger = Logger.getLogger(classOf[ShufflingServer].getName)
 
@@ -56,7 +56,7 @@ class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, te
           partitionID = request.partitionID
           if (fos == null) {
             logger.info(s"[ShufflingServer]: receiving shuffleData-$workerID-$partitionID")
-            val file = new File(tempDir + s"shuffle-$workerID-$partitionID")
+            val file = new File(shuffledDir + s"shuffle-$workerID-$partitionID")
             fos = new FileOutputStream(file)
           }
 

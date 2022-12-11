@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 import io.grpc.{ManagedChannelBuilder, Status}
 import io.grpc.stub.StreamObserver
 
-class ShufflingClient(host: String, port: Int, id: Int, tempDir: String) {
+class ShufflingClient(host: String, port: Int, id: Int, partitionDir: String) {
   val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext.build
   val blockingStub = ShuffleGrpc.blockingStub(channel)
   val asyncStub = ShuffleGrpc.stub(channel)
@@ -31,7 +31,7 @@ class ShufflingClient(host: String, port: Int, id: Int, tempDir: String) {
     val dir = new File(inputDir)
     if (dir.exists && dir.isDirectory) {
       val fileList = dir.listFiles
-      fileList.filter(file => file.isFile && file.getName.startsWith("chunk") &&
+      fileList.filter(file => file.isFile && file.getName.startsWith("Chunk") &&
       file.getName.split("-")(3).toInt == receiverID).toList
     } else {
       List[File]()
@@ -40,7 +40,7 @@ class ShufflingClient(host: String, port: Int, id: Int, tempDir: String) {
 
   def shuffle(receiverID: Int): Unit = {
     for {
-      file <- getListOfSendingFiles(tempDir, receiverID)
+      file <- getListOfSendingFiles(partitionDir, receiverID)
     } {
       val shufflePromise = Promise[Unit]()
       requestShuffle(file, shufflePromise)
