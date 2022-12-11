@@ -16,6 +16,8 @@ service Connection {
   rpc Pivot (PivotRequest) returns (PivotDone) {}
   rpc Partitioned (PartitionedRequest) returns (PartitionedDone) {}
   rpc ShuffleTry (ShuffleTryRequest) returns (ShuffleTryDone) {}
+  rpc Shuffled (ShuffledRequest) returns (ShuffledDone) {}
+  rpc MergeTry (MergeTryRequest) returns (MergeTryDone) {}
 }
 
 // The request message containing the worker's IP Address.
@@ -82,3 +84,26 @@ message ShuffleTryDone {
   StatusEnum status = 1;
 }
 
+// Request Shuffle Done
+// Worker -> Master
+message ShuffledRequest {
+  int32 workerID = 1;
+}
+
+// Shuffle Response
+// Master -> Worker
+message ShuffledDone {
+  bool isOk = 1;
+}
+
+// Request Merge Order
+// Worker -> Master
+message MergeTryRequest {
+  bool isRequested = 1;
+}
+
+// Merge Response
+// Master -> Worker
+message MergeTryDone {
+  StatusEnum status = 1;
+}
