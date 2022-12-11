@@ -56,7 +56,7 @@ class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, sh
           partitionID = request.partitionID
           if (fos == null) {
             logger.info(s"[ShufflingServer]: receiving shuffleData-$workerID-$partitionID")
-            val file = new File(shuffledDir + s"shuffle-$workerID-$partitionID")
+            val file = new File(shuffledDir + s"/shuffle-$workerID-$partitionID")
             fos = new FileOutputStream(file)
           }
 
