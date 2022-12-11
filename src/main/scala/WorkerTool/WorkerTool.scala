@@ -57,7 +57,7 @@ object WorkerTool{
     split
   }
 
-  def mergeTool(targetSeq: List[Stirng], inTmp: String, outTmp:String, myNum: Int, linesPerChunk : Int): String ={
+  def mergeTool(targetSeq: List[String], inTmp: String, output:String, myNum: Int, linesPerChunk : Int): String ={
     //val targetSeq = ChunkPathGenerator(countList: List[Int], tmp: String, myNum: Int)
     val n = max(1, linesPerChunk / targetSeq.size)
     val merge = mergeStep(targetSeq, output, n, inTmp)
@@ -70,14 +70,15 @@ object WorkerTool{
       def moveFile(in:String):Unit ={
         val (handle, lines) = IO.readLines(s"$inTmp/$in")
         val out = s"$outTmp/$in"
-        val move = IO.writeSeq(lines, out, true)
+        val move = IO.writeSeq(lines.toList, out, true)
         handle.close()
       }
 
-      chunks map {
+      targetSeq map {
       case fname =>
         moveFile(fname)
     }
+  }
 
 /*
   def mergeTool_for_me(targetSeq : Seq[String], tmp: String, myNum: Int, linesPerChunk: Int, output: String): String = {
