@@ -32,14 +32,16 @@ class ShuffleServerHandler(serverPort: Int, id: Int, tempDir: String) {
   def shuffle(workersIP: Map[Int, String]): Unit = {
     /* Send partition to other workers */
     for {
-      workerId <- ((id + 1) to workersIP.size) ++ (1 until id)
+      workerId <- (0 until workersIP.size)
     } {
-      logger.info(s"[ShuffleServerHandler] Try to send partition from ${id} to ${workerId}")
+      logger.info(s"[ShuffleServerHandler] Send partition, ${id} => ${workerId}")
       var client: ShufflingClient = null
       try {
-        val workerIP = workersIP(workerId)
-        client = new ShufflingClient(workerIP, 50052, id, tempDir)
-        client.shuffle(workerId)
+        if (workerId != id) {
+          val workerIP = workersIP(workerId)
+          client = new ShufflingClient(workerIP, 50052, id, tempDir)
+          client.shuffle(workerId)
+        }
       } finally {
         if (client != null) {
           client.shutdown
