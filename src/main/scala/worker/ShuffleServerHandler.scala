@@ -8,6 +8,7 @@ import java.io.{File, IOException}
 
 // import message.shuffleTry.{ShuffleGrpc, ShuffleTryRequest, ShuffleTryDone}
 import connection.message._
+import WorkerTool._
 // import common.{WorkerInfo, FileHandler, loggerLevel}
 
 
@@ -44,6 +45,10 @@ class ShuffleServerHandler(serverPort: Int, id: Int, partitionDir: String, shuff
           val workerIP = workersIP(workerId)
           client = new ShufflingClient(workerIP, 50052, id, partitionDir)
           client.shuffle(workerId)
+        }
+        else{
+          val ListofSelfFiles: List[String] = WorkerTool.getListOfSendingFiles(partitionDir, id).map(_.getName).toList
+          WorkerTool.moveFileTool(ListofSelfFiles, partitionDir, shuffledDir)
         }
       } finally {
         if (client != null) {

@@ -10,6 +10,8 @@ import scala.math.Ordering
 import scala.language.postfixOps
 import scala.util.Random
 
+import java.io.{File, IOException}
+
 
 object WorkerTool{
 
@@ -303,6 +305,17 @@ object WorkerTool{
       val result = (for(num <- 1 to workerN - 1) yield sorted_total_data(num * 10000 -1) ).toList
       result
     }
+
+  def getListOfSendingFiles(inputDir: String, receiverID: Int): List[File] = {
+    val dir = new File(inputDir)
+    if (dir.exists && dir.isDirectory) {
+      val fileList = dir.listFiles
+      fileList.filter(file => file.isFile && file.getName.startsWith("Chunk") &&
+      file.getName.split("-")(3).toInt == receiverID).toList
+    } else {
+      List[File]()
+    }
+  }
 
 }
 

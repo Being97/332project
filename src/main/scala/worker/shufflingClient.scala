@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString
 
 import message.shuffle.StatusEnum
 import message.shuffle.{ShuffleGrpc, ShuffleRequest, ShuffleDone}
-//import common._
+import WorkerTool._
 
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
@@ -26,21 +26,10 @@ class ShufflingClient(host: String, port: Int, id: Int, partitionDir: String) {
   def shutdown(): Unit = {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
   }
-  
-  def getListOfSendingFiles(inputDir: String, receiverID: Int): List[File] = {
-    val dir = new File(inputDir)
-    if (dir.exists && dir.isDirectory) {
-      val fileList = dir.listFiles
-      fileList.filter(file => file.isFile && file.getName.startsWith("Chunk") &&
-      file.getName.split("-")(3).toInt == receiverID).toList
-    } else {
-      List[File]()
-    }
-  }
 
   def shuffle(receiverID: Int): Unit = {
     for {
-      file <- getListOfSendingFiles(partitionDir, receiverID)
+      file <- WorkerTool.getListOfSendingFiles(partitionDir, receiverID)
     } {
       val shufflePromise = Promise[Unit]()
       requestShuffle(file, shufflePromise)
