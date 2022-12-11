@@ -21,6 +21,8 @@ CreateMsample=./src/main/resources/master/sample
 CreateSinput=./src/main/resources/worker/input
 CreateSpartition=./src/main/resources/worker/partition
 CreateSsamples=./src/main/resources/worker/samples
+CreateSshuffled=./src/main/resources/worker/shuffled
+
 
 if [ ! -d $CreateMsample ]; then
   mkdir $CreateMsample
@@ -34,6 +36,9 @@ fi
 if [ ! -d $CreateSsamples ]; then
   mkdir $CreateSsamples
 fi
+if [ ! -d $CreateSshuffled ]; then
+  mkdir $CreateSshuffled
+fi
 
 
 rm ./src/main/resources/master/sample/*
@@ -43,6 +48,8 @@ rm ./src/main/resources/worker/samples/*
 rm ./src/main/resources/worker/partition/*
 
 rm ./src/main/resources/worker/input/*
+rm ./src/main/resources/worker/shuffled/*
+
 
 chmod +x ./gensort
 
