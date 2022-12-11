@@ -188,8 +188,8 @@ class ConnectionClient(host: String, port: Int){
 
   def shuffleServer(): Unit = {
     logger.info("[ShuffleServer] ShuffleServer start")
-    val tempDir = new File(inputDir + "/shuffled" + id)
-    if (!tempDir.mkdir) throw new IOException("Could not create temporary directory: " + tempDir.getAbsolutePath)
+    val tempDir = new File(inputDir + "/shuffled")
+    // if (!tempDir.mkdir) throw new IOException("Could not create temporary directory: " + tempDir.getAbsolutePath)
     assert(tempDir.isDirectory)
     shuffleServerHandler = new ShuffleServerHandler(50052, id, tempDir.getAbsolutePath)
     shuffleServerHandler.serverStart
