@@ -36,6 +36,7 @@ class ConnectionClient(host: String, port: Int){
   val workersIP = Map[Int, String]()
   val pivots = Map[Int, String]()
 
+  var shuffleServerHandler: ShuffleServerHandler = null
 
   def shutdown(): Unit = {
     channel.shutdown.awaitTermination(100, TimeUnit.SECONDS)
@@ -144,7 +145,7 @@ class ConnectionClient(host: String, port: Int){
       case StatusEnum.SUCCESS => {
 
         for (w <- pivotResponse.workerIPList) {
-          workersIP(workersIP.size + 1) = w
+          workersIP(workersIP.size) = w
         }
         
         for (w <- pivotResponse.pivotsList) {
@@ -177,5 +178,83 @@ class ConnectionClient(host: String, port: Int){
     )
 
     logger.info("[Partition] Partition done")
+  }
+
+  def partitioned(): Unit = {
+    logger.info("[Partitioned] Partitioned start")
+    val partitionedResponse = blockingStub.partitioned(new PartitionedRequest(id))
+    logger.info("[Partitioned] Partitioned done")
+  }
+
+  def shuffleServer(): Unit = {
+    logger.info("[ShuffleServer] ShuffleServer start")
+    val partitionDir = new File(inputDir + "/partition")
+    val shuffledDir = new File(inputDir + "/shuffled")
+    // if (!tempDir.mkdir) throw new IOException("Could not create temporary directory: " + tempDir.getAbsolutePath)
+    assert(partitionDir.isDirectory && shuffledDir.isDirectory)
+    shuffleServerHandler = new ShuffleServerHandler(50052, id, partitionDir.getAbsolutePath, shuffledDir.getAbsolutePath, workersIP.toList.length)
+    shuffleServerHandler.serverStart
+    logger.info("[ShuffleServer] ShuffleServer done")
+  }
+
+  def requestShuffle(): Unit = {
+    logger.info("[requestShuffle] Waiting shuffle order")
+
+    val shuffleResponse = blockingStub.shuffleTry(new ShuffleTryRequest(true))
+    shuffleResponse.status match {
+      case StatusEnum.SUCCESS => {
+        logger.info("[requestShuffle] Shuffle order fire")
+      }
+      case StatusEnum.FAIL => {
+        logger.info("[requestShuffle] Shuffle failed.")
+        throw new Exception
+      }
+      case _ => {
+        /* Wait 5 seconds and retry */
+        Thread.sleep(5 * 1000)
+        requestShuffle
+      }
+    }
+  }
+
+  def shuffle(): Unit = {
+    logger.info("[Shuffle] Shuffle start")
+    shuffleServerHandler.shuffle(workersIP)
+    logger.info("[Shuffle] Shuffle done")
+  }
+
+  def shuffled(): Unit = {
+    logger.info("[shuffled] shuffled start")
+    val shuffledResponse = blockingStub.shuffled(new ShuffledRequest(id))
+    logger.info("[shuffled] shuffled done")
+  }
+
+  def requestMerge(): Unit = {
+    logger.info("[requestmerge] Waiting merge order")
+
+    val mergeResponse = blockingStub.mergeTry(new MergeTryRequest(true))
+    mergeResponse.status match {
+      case StatusEnum.SUCCESS => {
+        logger.info("[requestmerge] merge order fire")
+      }
+      case StatusEnum.FAIL => {
+        logger.info("[requestmerge] merge failed.")
+        throw new Exception
+      }
+      case _ => {
+        /* Wait 5 seconds and retry */
+        Thread.sleep(5 * 1000)
+        requestMerge
+      }
+    }
+  }
+
+  def merge(): Unit = {
+    logger.info("[Merge] Merge start")
+    val dir = new File(s"$inputDir/shuffled")
+    val dir2 = new File(s"$inputDir/result")
+    val linesPerChunk = 320000 / workersIP.toList.length
+    WorkerTool.mergeTool(dir.list().toList, dir.toString, dir2.toString, -1, linesPerChunk)
+    logger.info("[Merge] Merge done")
   }
 }

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package message;
+
+enum StatusEnum {
+  PROGRESS = 0;
+  SUCCESS = 1;
+  FAIL = 2;
+}
+
+// Shuffling Partitioned Data
+// Worker -> Other Workers
+message ShuffleRequest {
+  int32 workerID = 1;
+  int32 partitionID = 2;
+  bytes shuffleData = 3;
+}
+
+// ShufflingDone Message
+// Worker -> Worker 
+message ShuffleDone {
+  StatusEnum status = 1;
+}
+
+service Shuffle {
+  rpc Shuffle(stream ShuffleRequest) returns (ShuffleDone) {}
+}

@@ -21,6 +21,8 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
   val outputDir = System.getProperty("user.dir") + "/src/main/resources/master"
   var state: MASTERSTATE = MASTERREADY
   var sampledWorkerCount: Int = 0
+  var partitionedWorkerCount: Int = 0
+  var shuffledWorkerCount: Int = 0
   var pivotList: List[String] = null
 
   def start(): Unit = {
@@ -119,6 +121,57 @@ class ConnectionServer(executionContext: ExecutionContext, numWorkers: Int, port
       }
     }
 
+    override def partitioned(req: PartitionedRequest) = {
+      logger.info("Worker " + req.workerID + " is Partitioned")
+      partitionedWorkerCount += 1
+      
+      if (partitionedWorkerCount == numWorkers) {
+        logger.info("all workers Partitioned")
+        state = PARTITIONED
+      }
+      
+      Future.successful(new PartitionedDone(isOk = true))
+    }  
+
+    override def shuffleTry(request: ShuffleTryRequest): Future[ShuffleTryDone] = state match {
+      case PARTITIONED => {
+        Future.successful(new ShuffleTryDone(
+          status = StatusEnum.SUCCESS,
+        ))
+      }
+      case FAILED => {
+        Future.failed(new Exception)
+      }
+      case _ => {
+        Future.successful(new ShuffleTryDone(status = StatusEnum.PROGRESS))
+      }
+    }
+
+    override def shuffled(req: ShuffledRequest) = {
+      logger.info("Worker " + req.workerID + " is shuffled")
+      shuffledWorkerCount += 1
+      
+      if (shuffledWorkerCount == numWorkers) {
+        logger.info("all workers shuffled")
+        state = SHUFFLED
+      }
+      
+      Future.successful(new ShuffledDone(isOk = true))
+    }  
+
+    override def mergeTry(request: MergeTryRequest): Future[MergeTryDone] = state match {
+      case SHUFFLED => {
+        Future.successful(new MergeTryDone(
+          status = StatusEnum.SUCCESS,
+        ))
+      }
+      case FAILED => {
+        Future.failed(new Exception)
+      }
+      case _ => {
+        Future.successful(new MergeTryDone(status = StatusEnum.PROGRESS))
+      }
+    }
   }
   
 }
