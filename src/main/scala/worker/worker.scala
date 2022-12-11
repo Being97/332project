@@ -50,6 +50,9 @@ object Worker {
       // shuffle
       client.shuffle
 
+      // merge sort after shuffle
+      client.merge
+
     } finally {
       client.awaitTermination()
       // client.shutdown()

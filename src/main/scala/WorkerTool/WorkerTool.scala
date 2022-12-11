@@ -77,8 +77,9 @@ object WorkerTool{
       targetSeq map {
       case fname =>
         moveFile(fname)
+      }
     }
-  }
+  
 
 /*
   def mergeTool_for_me(targetSeq : Seq[String], tmp: String, myNum: Int, linesPerChunk: Int, output: String): String = {

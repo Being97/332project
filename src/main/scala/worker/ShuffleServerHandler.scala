@@ -11,13 +11,13 @@ import connection.message._
 // import common.{WorkerInfo, FileHandler, loggerLevel}
 
 
-class ShuffleServerHandler(serverPort: Int, id: Int, partitionDir: String, shuffledDir: String) {
+class ShuffleServerHandler(serverPort: Int, id: Int, partitionDir: String, shuffledDir: String, numWorkers: Int) {
   val logger = Logger.getLogger(classOf[ShuffleServerHandler].getName)  
 
   var server: ShufflingServer = null
 
   def serverStart(): Unit = {
-    server = new ShufflingServer(ExecutionContext.global, serverPort, id, shuffledDir)
+    server = new ShufflingServer(ExecutionContext.global, serverPort, id, shuffledDir, numWorkers)
     server.start
   }
 

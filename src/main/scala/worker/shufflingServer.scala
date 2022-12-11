@@ -2,7 +2,7 @@ package worker
 
 import message.shuffle.StatusEnum
 import message.shuffle.{ShuffleGrpc, ShuffleRequest, ShuffleDone}
-// import common._
+import WorkerTool._
 
 import java.util.logging.Logger
 import java.util.concurrent.TimeUnit
@@ -15,9 +15,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.io.{OutputStream, FileOutputStream, File}
 
-class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, shuffledDir: String) { self =>
+class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, shuffledDir: String, numWorkers: Int) { self =>
   var server: Server = null
   val logger: Logger = Logger.getLogger(classOf[ShufflingServer].getName)
+  var receivedWorkerCount: Int = 0
+  var state: WORKERSERVERSTATE = WORKERSERVERREADY
 
   def start(): Unit = {
     server = ServerBuilder.forPort(port)
@@ -29,6 +31,13 @@ class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, sh
       System.err.println("Shutting down ShufflingServer since JVM is shutting down")
       self.stop()
       System.err.println("ShufflingServer shut down")
+    }
+  }
+
+  def tryMerge(): Unit = {
+    if(receivedWorkerCount == numWorkers){
+      logger.info(s"[tryMerge]: All workers sent partition. Start Merge.")
+      state = ALLPARTRECEIVED
     }
   }
 
@@ -75,6 +84,9 @@ class ShufflingServer(executionContext: ExecutionContext, port: Int, id: Int, sh
           fos.close()
           responseObserver.onNext(new ShuffleDone(StatusEnum.SUCCESS))
           responseObserver.onCompleted
+
+          receivedWorkerCount += 1
+          tryMerge
         }
       }
     }
