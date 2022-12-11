@@ -145,7 +145,7 @@ class ConnectionClient(host: String, port: Int){
       case StatusEnum.SUCCESS => {
 
         for (w <- pivotResponse.workerIPList) {
-          workersIP(workersIP.size + 1) = w
+          workersIP(workersIP.size) = w
         }
         
         for (w <- pivotResponse.pivotsList) {
