@@ -1,14 +1,14 @@
 #!bin/sh
 
 
-CreateResources=/home/orange/332project/src/main/resources
+CreateResources=./src/main/resources
 
 if [ ! -d $CreateResources ]; then
   mkdir $CreateResources
 fi
 
-CreateMaster=/home/orange/332project/src/main/resources/master
-Createworker=/home/orange/332project/src/main/resources/worker
+CreateMaster=./src/main/resources/master
+Createworker=./src/main/resources/worker
 
 if [ ! -d $CreateMaster ]; then
   mkdir $CreateMaster
@@ -17,10 +17,10 @@ if [ ! -d $Createworker ]; then
   mkdir $Createworker
 fi
 
-CreateMsample=/home/orange/332project/src/main/resources/master/sample
-CreateSinput=/home/orange/332project/src/main/resources/worker/input
-CreateSpartition=/home/orange/332project/src/main/resources/worker/partition
-CreateSsamples=/home/orange/332project/src/main/resources/worker/samples
+CreateMsample=./src/main/resources/master/sample
+CreateSinput=./src/main/resources/worker/input
+CreateSpartition=./src/main/resources/worker/partition
+CreateSsamples=./src/main/resources/worker/samples
 
 if [ ! -d $CreateMsample ]; then
   mkdir $CreateMsample
@@ -35,11 +35,19 @@ if [ ! -d $CreateSsamples ]; then
   mkdir $CreateSsamples
 fi
 
-cd
-rm /home/orange/332project/src/main/resources/master/sample/*
 
-cd
-rm /home/orange/332project/src/main/resources/worker/samples/*
+rm ./src/main/resources/master/sample/*
 
-cd
-rm /home/orange/332project/src/main/resources/worker/partition/*
+rm ./src/main/resources/worker/samples/*
+
+rm ./src/main/resources/worker/partition/*
+
+rm ./src/main/resources/worker/input/*
+
+chmod +x ./gensort
+
+for var in 1 2 3 4 5
+do
+./gensort -a 10000 ./src/main/resources/worker/input/gensort$var
+done
+
